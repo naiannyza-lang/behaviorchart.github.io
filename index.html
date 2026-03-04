@@ -4,84 +4,583 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Tabla de Comportamiento</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root{
+      --shadow: 0 18px 50px rgba(0,0,0,.25);
+      --card: rgba(255,255,255,.92);
+      --stroke: rgba(255,255,255,.55);
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      min-height:100vh;
+
+      /* ✅ Background image */
+      background-image: url("./assets/bg.jpg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    /* soft white wash + slight blur vibe */
+    .page-wash{
+      min-height:100vh;
+      background: radial-gradient(ellipse at top, rgba(255,255,255,.72), rgba(255,255,255,.40));
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      padding: 28px 18px 40px;
+    }
+
+    .header{
+      text-align:center;
+      color:#fff;
+      text-shadow: 0 3px 0 rgba(0,0,0,.15), 0 12px 22px rgba(0,0,0,.20);
+      margin-bottom: 18px;
+    }
+    .header h1{
+      margin: 0 0 6px;
+      font-size: clamp(34px, 4.8vw, 56px);
+      font-weight: 900;
+      letter-spacing: .4px;
+    }
+    .header .sub{
+      margin:0;
+      font-size: clamp(12px, 1.8vw, 16px);
+      opacity: .95;
+      font-weight: 700;
+    }
+    .stars{
+      font-size: clamp(22px, 3.6vw, 36px);
+      letter-spacing: 8px;
+      margin-bottom: 6px;
+      user-select:none;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 180px minmax(320px, 720px) 330px;
+      gap: 18px;
+      align-items:start;
+      justify-content:center;
+      max-width: 1250px;
+      margin: 0 auto;
+    }
+
+    /* left + right token rails */
+    .rail{
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+      padding-top: 120px;
+      align-items:center;
+    }
+
+    /* board card */
+    .board{
+      border-radius: 18px;
+      background: var(--card);
+      border: 3px solid rgba(255,100,0,.9);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .lane{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height: 96px;
+      font-weight: 900;
+      font-size: 34px;
+      letter-spacing: .4px;
+      user-select:none;
+    }
+
+    /* ✅ Top “extra point” zone with hamster */
+    .lane.extra{
+      height: 185px;
+      background: #fff;
+      border-bottom: 3px solid rgba(255,100,0,.9);
+      flex-direction:column;
+      gap:10px;
+    }
+    .extra img{
+      width: 96px;
+      height: auto;
+      image-rendering: auto;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
+    }
+    .extra .label{
+      font-size: 24px;
+      color: #d64b00;
+      text-shadow: 0 2px 0 rgba(0,0,0,.08);
+    }
+
+    .lane.bien{ background:#1f8fe8; color: rgba(255,255,255,.50); }
+    .lane.vale{ background:#43a851; color: rgba(255,255,255,.45); height: 170px; font-size: 40px;}
+    .lane.meh{  background:#ffd631; color: rgba(0,0,0,.22); }
+    .lane.cuidado{ background:#ff6a3a; color: rgba(255,255,255,.40); }
+    .lane.evil{ background:#d62828; color: rgba(255,255,255,.35); border-bottom-left-radius:18px; border-bottom-right-radius:18px;}
+
+    /* drop zones inside lanes (so tokens can sit inside) */
+    .dropzone{
+      position:absolute;
+      inset: 0;
+      padding: 8px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+    .lane .title{
+      position:relative;
+      z-index: 1;
+      pointer-events:none;
+    }
+
+    /* Token (name plate) */
+    .token{
+      width: 112px;
+      height: 44px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      background: #fff;
+      border: 3px solid rgba(0,0,0,.08);
+      box-shadow: 0 10px 18px rgba(0,0,0,.18);
+      cursor: grab;
+      user-select:none;
+      position:relative;
+      transform: rotate(-3deg);
+    }
+    .token:active{ cursor: grabbing; }
+    .token small{
+      font-size: 15px;
+      padding: 0 8px;
+      line-height: 1;
+    }
+    .token::before, .token::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      width:10px;height:10px;
+      border-radius:50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,.7);
+      border: 2px solid rgba(0,0,0,.08);
+    }
+    .token::before{ left: -8px;}
+    .token::after{ right: -8px;}
+
+    /* token colors */
+    .t-red{ background:#e53935; color:#fff; }
+    .t-orange{ background:#f39c12; color:#fff; }
+    .t-purple{ background:#7e3bbd; color:#fff; }
+    .t-blue{ background:#1f77b4; color:#fff; }
+    .t-green{ background:#2e9d53; color:#fff; }
+    .t-pink{ background:#d81b60; color:#fff; }
+
+    /* right side: controls, trash, timer */
+    .side{
+      display:flex;
+      flex-direction:column;
+      gap: 16px;
+      padding-top: 52px;
+      align-items:center;
+    }
+
+    .trash{
+      width: 190px;
+      text-align:center;
+      background: rgba(255,255,255,.60);
+      border: 2px solid var(--stroke);
+      border-radius: 18px;
+      padding: 14px 12px;
+      box-shadow: 0 12px 24px rgba(0,0,0,.10);
+    }
+    .trash .icon{
+      font-size: 58px;
+      line-height: 1;
+      margin-bottom: 6px;
+      user-select:none;
+    }
+    .trash .lbl{
+      font-weight:900;
+      color:#fff;
+      text-shadow: 0 2px 0 rgba(0,0,0,.15);
+      letter-spacing:.6px;
+    }
+
+    .btn{
+      width: 220px;
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 900;
+      color:#fff;
+      cursor:pointer;
+      box-shadow: 0 14px 28px rgba(0,0,0,.18);
+      transition: transform .08s ease;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.blue{ background: #2f80ed; }
+    .btn.green{ background: #11c37a; }
+
+    .timer{
+      width: 260px;
+      background: rgba(255,255,255,.92);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(0,0,0,.06);
+      padding: 14px;
+    }
+    .timer .ham{
+      width: 70px;
+      margin: 4px auto 8px;
+      display:block;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.15));
+    }
+    .timer .time{
+      text-align:center;
+      font-size: 44px;
+      font-weight: 1000;
+      color:#12b264;
+      margin: 2px 0 6px;
+    }
+    .timer input{
+      width: 100%;
+      border-radius: 12px;
+      border: 2px solid rgba(0,0,0,.10);
+      padding: 10px 12px;
+      font-weight: 800;
+      outline:none;
+    }
+    .timer .start{
+      margin-top: 10px;
+      width: 100%;
+      background:#11c37a;
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 900;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    /* responsive */
+    @media (max-width: 1050px){
+      .layout{ grid-template-columns: 1fr; }
+      .rail{ flex-direction:row; padding-top: 0; justify-content:center; flex-wrap:wrap;}
+      .side{ padding-top: 0; }
+    }
+
+    /* drag highlight */
+    .is-over{ outline: 4px dashed rgba(255,255,255,.65); outline-offset:-8px; }
+  </style>
 </head>
 <body>
-  <div class="bg-overlay"></div>
+  <div class="page-wash">
+    <div class="header">
+      <div class="stars">⭐ ⭐ ⭐ 🎓 Tabla de Comportamiento ⭐ ⭐ ⭐</div>
+      <p class="sub">Arrastra fichas entre niveles • Suelta en la papelera para ausencias</p>
+    </div>
 
-  <header class="top">
-    <div class="stars">⭐ ⭐ ⭐ <span class="cap">🎓</span> ⭐ ⭐ ⭐</div>
-    <h1>Tabla de Comportamiento</h1>
-    <p class="subtitle">Arrastra fichas entre niveles · Suelta en la papelera para ausencias</p>
-  </header>
+    <div class="layout">
+      <!-- LEFT RAIL -->
+      <div class="rail" id="rail-left"></div>
 
-  <main class="layout">
-    <!-- LEFT: spare chips (optional “parking”) -->
-    <aside class="side left">
-      <div class="chip red" draggable="true" data-id="alex">Alex</div>
-      <div class="chip orange" draggable="true" data-id="sam">Sam</div>
-      <div class="chip purple" draggable="true" data-id="riley">Riley</div>
-    </aside>
-
-    <!-- BOARD -->
-    <section class="board-wrap">
-      <div class="board" id="board">
-        <div class="level extra" data-level="extra">
-          <div class="level-top">
-            <div class="bunny">😇</div>
-            <div class="extra-text">⭐ ¡Extra Punto!</div>
-          </div>
-          <div class="dropzone" data-drop="extra"></div>
+      <!-- BOARD -->
+      <div class="board" aria-label="Tabla de comportamiento">
+        <div class="lane extra" data-zone="extra">
+          <!-- ✅ hamster in the top zone -->
+          <img src="./assets/hamster.png" alt="Hamster" />
+          <div class="label">⭐ ¡Extra Punto!</div>
+          <div class="dropzone" id="zone-extra"></div>
         </div>
 
-        <div class="level bien" data-level="bien">
-          <div class="level-title">Bien</div>
-          <div class="dropzone" data-drop="bien"></div>
+        <div class="lane bien" data-zone="bien">
+          <div class="title">Bien</div>
+          <div class="dropzone" id="zone-bien"></div>
         </div>
 
-        <div class="level vale" data-level="vale">
-          <div class="level-title">Vale</div>
-          <div class="dropzone" data-drop="vale"></div>
+        <div class="lane vale" data-zone="vale">
+          <div class="title">Vale</div>
+          <div class="dropzone" id="zone-vale"></div>
         </div>
 
-        <div class="level meh" data-level="meh">
-          <div class="level-title">Meh</div>
-          <div class="dropzone" data-drop="meh"></div>
+        <div class="lane meh" data-zone="meh">
+          <div class="title">Meh</div>
+          <div class="dropzone" id="zone-meh"></div>
         </div>
 
-        <div class="level cuidado" data-level="cuidado">
-          <div class="level-title">Cuidado</div>
-          <div class="dropzone" data-drop="cuidado"></div>
+        <div class="lane cuidado" data-zone="cuidado">
+          <div class="title">Cuidado</div>
+          <div class="dropzone" id="zone-cuidado"></div>
         </div>
 
-        <div class="level evil" data-level="evil">
-          <div class="level-title">EVIL 😈</div>
-          <div class="dropzone" data-drop="evil"></div>
+        <div class="lane evil" data-zone="evil">
+          <div class="title">EVIL 😈</div>
+          <div class="dropzone" id="zone-evil"></div>
         </div>
       </div>
-    </section>
 
-    <!-- RIGHT: trash + controls + timer card (visual only) -->
-    <aside class="side right">
-      <div class="trash" id="trash">
-        <div class="trash-icon">🗑️</div>
-        <div class="trash-label">AUSENTE 😳</div>
+      <!-- RIGHT SIDE -->
+      <div class="side">
+        <div class="trash" id="trash">
+          <div class="icon">🗑️</div>
+          <div class="lbl">AUSENTE 😳</div>
+        </div>
+
+        <button class="btn blue" id="edit">✏️ Editar Fichas</button>
+        <button class="btn green" id="reset">🔄 Reiniciar Todo</button>
+
+        <div class="timer">
+          <!-- ✅ hamster in timer card -->
+          <img class="ham" src="./assets/hamster.png" alt="Hamster" />
+          <div class="time" id="timeDisplay">5:00</div>
+          <input id="timeInput" placeholder="Escribe MM:SS o minutos" />
+          <button class="start" id="startBtn">▶ Start</button>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <div class="controls">
-        <button id="editBtn" class="btn blue">✏️ Editar Fichas</button>
-        <button id="resetBtn" class="btn green">♻️ Reiniciar Todo</button>
-      </div>
+  <script>
+    // --- Simple drag & drop behavior board (no libs) ---
 
-      <div class="timer">
-        <div class="timer-bunny">😇</div>
-        <div class="timer-time" id="timerDisplay">5:00</div>
-        <input id="timerInput" class="timer-input" placeholder="Escribe MM:SS o minutos" />
-        <button id="startBtn" class="btn start">▶ Start</button>
-      </div>
-    </aside>
-  </main>
+    const DEFAULT_TOKENS = [
+      { name: "Alex",  color: "t-red",    rail: "left"  },
+      { name: "Sam",   color: "t-orange", rail: "left"  },
+      { name: "Riley", color: "t-purple", rail: "left"  },
+      { name: "Jamie", color: "t-blue",   rail: "right" },
+      { name: "Jordan",color: "t-green",  rail: "right" },
+      { name: "Casey", color: "t-pink",   rail: "right" },
+    ];
 
-  <script src="app.js"></script>
+    const zones = ["extra","bien","vale","meh","cuidado","evil"];
+    const $ = (id) => document.getElementById(id);
+
+    const railLeft = $("rail-left");
+    const railRight = document.createElement("div");
+    railRight.className = "rail";
+    railRight.id = "rail-right";
+    // On desktop the layout already has 3 columns, but on narrow screens we fall back to 1 column.
+    // We'll keep right-rail tokens in a virtual container by placing them into the first rail if needed.
+    // For simplicity: we inject a second rail only when desktop layout is active.
+    // We'll instead render right-rail tokens into the right side area when needed.
+    // To match your screenshot better, we'll render right-rail tokens floating beside the board on desktop:
+    // We'll just append to the right side at the top.
+    const side = document.querySelector(".side");
+    const rightTokenDock = document.createElement("div");
+    rightTokenDock.style.display = "flex";
+    rightTokenDock.style.flexDirection = "column";
+    rightTokenDock.style.gap = "14px";
+    rightTokenDock.style.alignItems = "center";
+    rightTokenDock.style.marginBottom = "6px";
+    side.prepend(rightTokenDock);
+
+    function uid(){
+      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
+
+    function makeToken(t){
+      const el = document.createElement("div");
+      el.className = `token ${t.color}`;
+      el.draggable = true;
+      el.dataset.id = t.id;
+      el.innerHTML = `<small>${escapeHtml(t.name)}</small>`;
+
+      el.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", t.id);
+        e.dataTransfer.effectAllowed = "move";
+        // small visual improvement
+        setTimeout(() => el.style.opacity = "0.35", 0);
+      });
+      el.addEventListener("dragend", () => {
+        el.style.opacity = "1";
+        persist();
+      });
+
+      return el;
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    // State model:
+    // tokenPositions: { [id]: { where: "rail-left"|"rail-right"|zoneName|"absent" } }
+    let tokens = [];
+    let tokenPositions = {};
+
+    function load(){
+      const raw = localStorage.getItem("behavior_board_state_v1");
+      if(!raw) return false;
+      try{
+        const parsed = JSON.parse(raw);
+        tokens = parsed.tokens || [];
+        tokenPositions = parsed.tokenPositions || {};
+        return tokens.length > 0;
+      }catch{
+        return false;
+      }
+    }
+
+    function persist(){
+      localStorage.setItem("behavior_board_state_v1", JSON.stringify({ tokens, tokenPositions }));
+    }
+
+    function resetAll(){
+      localStorage.removeItem("behavior_board_state_v1");
+      init(true);
+    }
+
+    function render(){
+      // clear containers
+      railLeft.innerHTML = "";
+      rightTokenDock.innerHTML = "";
+      zones.forEach(z => $("zone-"+z).innerHTML = "");
+      $("trash").classList.remove("is-over");
+
+      // render tokens into correct place
+      for(const t of tokens){
+        const el = makeToken(t);
+        const pos = tokenPositions[t.id]?.where || (t.rail === "left" ? "rail-left" : "rail-right");
+
+        if(pos === "rail-left") railLeft.appendChild(el);
+        else if(pos === "rail-right") rightTokenDock.appendChild(el);
+        else if(pos === "absent") {
+          // absent tokens can just sit under trash visually
+          $("trash").appendChild(el);
+          el.style.marginTop = "10px";
+          el.style.transform = "rotate(2deg)";
+        }
+        else {
+          // zone
+          const zoneEl = $("zone-"+pos);
+          if(zoneEl) zoneEl.appendChild(el);
+          else railLeft.appendChild(el);
+        }
+      }
+    }
+
+    function installDropTarget(el, where){
+      el.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        el.classList.add("is-over");
+      });
+      el.addEventListener("dragleave", () => el.classList.remove("is-over"));
+      el.addEventListener("drop", (e) => {
+        e.preventDefault();
+        el.classList.remove("is-over");
+        const id = e.dataTransfer.getData("text/plain");
+        if(!id) return;
+        tokenPositions[id] = { where };
+        render();
+        persist();
+      });
+    }
+
+    function editTokens(){
+      const current = tokens.map(t => t.name).join(", ");
+      const input = prompt(
+        "Escribe nombres separados por comas.\nEj: Alex, Sam, Riley, Jamie, Jordan, Casey",
+        current
+      );
+      if(input == null) return;
+
+      const names = input.split(",").map(s => s.trim()).filter(Boolean);
+      if(names.length === 0) return;
+
+      // Keep colors cycling
+      const palette = ["t-red","t-orange","t-purple","t-blue","t-green","t-pink"];
+      tokens = names.map((name, i) => {
+        return { id: uid(), name, color: palette[i % palette.length], rail: (i < Math.ceil(names.length/2) ? "left" : "right") };
+      });
+      tokenPositions = {};
+      render();
+      persist();
+    }
+
+    // Timer
+    let timerInterval = null;
+    let remaining = 5 * 60;
+
+    function formatTime(sec){
+      const m = Math.floor(sec/60);
+      const s = sec % 60;
+      return `${m}:${String(s).padStart(2,"0")}`;
+    }
+    function setTimeDisplay(sec){
+      $("timeDisplay").textContent = formatTime(sec);
+    }
+    function parseTimeInput(v){
+      v = String(v || "").trim();
+      if(!v) return null;
+      if(/^\d+$/.test(v)) return parseInt(v,10) * 60; // minutes
+      const m = v.match(/^(\d{1,3}):(\d{1,2})$/);
+      if(!m) return null;
+      const mm = parseInt(m[1],10);
+      const ss = Math.min(59, parseInt(m[2],10));
+      return mm*60 + ss;
+    }
+
+    function startTimer(){
+      // set new time if provided
+      const parsed = parseTimeInput($("timeInput").value);
+      if(parsed != null) remaining = parsed;
+
+      if(timerInterval){
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      setTimeDisplay(remaining);
+      timerInterval = setInterval(() => {
+        remaining = Math.max(0, remaining - 1);
+        setTimeDisplay(remaining);
+        if(remaining === 0){
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+      }, 1000);
+    }
+
+    function init(forceDefaults=false){
+      const hasSaved = !forceDefaults && load();
+      if(!hasSaved){
+        tokens = DEFAULT_TOKENS.map(t => ({...t, id: uid()}));
+        tokenPositions = {};
+        persist();
+      }
+
+      // install drop targets
+      installDropTarget(railLeft, "rail-left");
+      installDropTarget(rightTokenDock, "rail-right");
+      zones.forEach(z => installDropTarget($("zone-"+z), z));
+      installDropTarget($("trash"), "absent");
+
+      $("edit").onclick = editTokens;
+      $("reset").onclick = resetAll;
+      $("startBtn").onclick = startTimer;
+
+      // default time
+      remaining = 5 * 60;
+      setTimeDisplay(remaining);
+
+      render();
+    }
+
+    init(false);
+  </script>
 </body>
 </html>
