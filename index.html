@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tabla de Comportamiento</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-overlay"></div>
+
+  <header class="top">
+    <div class="stars">⭐ ⭐ ⭐ <span class="cap">🎓</span> ⭐ ⭐ ⭐</div>
+    <h1>Tabla de Comportamiento</h1>
+    <p class="subtitle">Arrastra fichas entre niveles · Suelta en la papelera para ausencias</p>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: spare chips (optional “parking”) -->
+    <aside class="side left">
+      <div class="chip red" draggable="true" data-id="alex">Alex</div>
+      <div class="chip orange" draggable="true" data-id="sam">Sam</div>
+      <div class="chip purple" draggable="true" data-id="riley">Riley</div>
+    </aside>
+
+    <!-- BOARD -->
+    <section class="board-wrap">
+      <div class="board" id="board">
+        <div class="level extra" data-level="extra">
+          <div class="level-top">
+            <div class="bunny">😇</div>
+            <div class="extra-text">⭐ ¡Extra Punto!</div>
+          </div>
+          <div class="dropzone" data-drop="extra"></div>
+        </div>
+
+        <div class="level bien" data-level="bien">
+          <div class="level-title">Bien</div>
+          <div class="dropzone" data-drop="bien"></div>
+        </div>
+
+        <div class="level vale" data-level="vale">
+          <div class="level-title">Vale</div>
+          <div class="dropzone" data-drop="vale"></div>
+        </div>
+
+        <div class="level meh" data-level="meh">
+          <div class="level-title">Meh</div>
+          <div class="dropzone" data-drop="meh"></div>
+        </div>
+
+        <div class="level cuidado" data-level="cuidado">
+          <div class="level-title">Cuidado</div>
+          <div class="dropzone" data-drop="cuidado"></div>
+        </div>
+
+        <div class="level evil" data-level="evil">
+          <div class="level-title">EVIL 😈</div>
+          <div class="dropzone" data-drop="evil"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: trash + controls + timer card (visual only) -->
+    <aside class="side right">
+      <div class="trash" id="trash">
+        <div class="trash-icon">🗑️</div>
+        <div class="trash-label">AUSENTE 😳</div>
+      </div>
+
+      <div class="controls">
+        <button id="editBtn" class="btn blue">✏️ Editar Fichas</button>
+        <button id="resetBtn" class="btn green">♻️ Reiniciar Todo</button>
+      </div>
+
+      <div class="timer">
+        <div class="timer-bunny">😇</div>
+        <div class="timer-time" id="timerDisplay">5:00</div>
+        <input id="timerInput" class="timer-input" placeholder="Escribe MM:SS o minutos" />
+        <button id="startBtn" class="btn start">▶ Start</button>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
